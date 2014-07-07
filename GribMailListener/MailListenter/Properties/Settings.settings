@@ -8,14 +8,26 @@
     <Setting Name="imapuser" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="password" Type="System.String" Scope="User">
+    <Setting Name="imappassword" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="port" Type="System.Int32" Scope="User">
+    <Setting Name="imapport" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">993</Value>
     </Setting>
     <Setting Name="lastfetchuid" Type="System.String" Scope="User">
       <Value Profile="(Default)">*</Value>
+    </Setting>
+    <Setting Name="smtpserver" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="smtpuser" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="smtppassword" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="smtpport" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">587</Value>
     </Setting>
   </Settings>
 </SettingsFile>

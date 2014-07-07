@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailListener", "ConsoleApplication1\MailListener.csproj", "{0C020B1E-F769-44DB-AA89-12E7E9CD06A7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailListener", "MailListenter\MailListener.csproj", "{0C020B1E-F769-44DB-AA89-12E7E9CD06A7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AE.Net.Mail", "..\aenetmail-master\AE.Net.Mail.csproj", "{68E9CF8C-AB54-4CC7-A34F-C7F469E4EFE0}"
 EndProject
@@ -16,6 +16,7 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{0C020B1E-F769-44DB-AA89-12E7E9CD06A7}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{0C020B1E-F769-44DB-AA89-12E7E9CD06A7}.Debug|Any CPU.Build.0 = Debug|x86
 		{0C020B1E-F769-44DB-AA89-12E7E9CD06A7}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
 		{0C020B1E-F769-44DB-AA89-12E7E9CD06A7}.Debug|Mixed Platforms.Build.0 = Debug|x86
 		{0C020B1E-F769-44DB-AA89-12E7E9CD06A7}.Debug|x86.ActiveCfg = Debug|x86

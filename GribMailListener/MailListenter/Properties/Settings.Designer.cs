@@ -50,24 +50,24 @@ namespace MailListenter.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string password {
+        public string imappassword {
             get {
-                return ((string)(this["password"]));
+                return ((string)(this["imappassword"]));
             }
             set {
-                this["password"] = value;
+                this["imappassword"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("993")]
-        public int port {
+        public int imapport {
             get {
-                return ((int)(this["port"]));
+                return ((int)(this["imapport"]));
             }
             set {
-                this["port"] = value;
+                this["imapport"] = value;
             }
         }
         
@@ -80,6 +80,54 @@ namespace MailListenter.Properties {
             }
             set {
                 this["lastfetchuid"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string smtpserver {
+            get {
+                return ((string)(this["smtpserver"]));
+            }
+            set {
+                this["smtpserver"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string smtpuser {
+            get {
+                return ((string)(this["smtpuser"]));
+            }
+            set {
+                this["smtpuser"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string smtppassword {
+            get {
+                return ((string)(this["smtppassword"]));
+            }
+            set {
+                this["smtppassword"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("587")]
+        public int smtpport {
+            get {
+                return ((int)(this["smtpport"]));
+            }
+            set {
+                this["smtpport"] = value;
             }
         }
     }
