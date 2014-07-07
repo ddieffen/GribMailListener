@@ -50,29 +50,39 @@ namespace MailListenter
                     // Get the first *11* messages. 0 is the first message;
                     // and it also includes the 10th message, which is really the eleventh ;)
                     // MailMessage represents, well, a message in your mailbox
-                    AE.Net.Mail.MailMessage[] mm = ic.GetMessages(MailListenter.Properties.Settings.Default.lastfetchuid, "*", false);
-
-                    foreach (AE.Net.Mail.MailMessage m in mm)
+                    try
                     {
-                        if (!m.Uid.Equals(MailListenter.Properties.Settings.Default.lastfetchuid))
+                        AE.Net.Mail.MailMessage[] mm = ic.GetMessages(MailListenter.Properties.Settings.Default.lastfetchuid, "*", false);
+
+                        foreach (AE.Net.Mail.MailMessage m in mm)
                         {
-                            Query q = new Query(m, awaiting);
-                            if (q.isValid())
+                            if (!m.Uid.Equals(MailListenter.Properties.Settings.Default.lastfetchuid))
                             {
-                                string result = q.execute();
-                                Console.WriteLine("\r" + DateTime.Now.ToString() + " Executing Request:" + q.ToString());
-                                if (result != "")
-                                    awaiting.Add(result);
+                                Query q = new Query(m, awaiting);
+                                if (q.isValid())
+                                {
+                                    string result = q.execute();
+                                    Console.WriteLine("\r" + DateTime.Now.ToString() + " Executing Request:" + q.ToString());
+                                    if (result != "")
+                                        awaiting.Add(result);
+                                }
                             }
+                            MailListenter.Properties.Settings.Default.lastfetchuid = m.Uid;
+                            MailListenter.Properties.Settings.Default.Save();
                         }
-                        MailListenter.Properties.Settings.Default.lastfetchuid = m.Uid;
-                        lastUpdate = DateTime.Now;
                     }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("Exception Occured: " + e.Message);
+                    }
+                    lastUpdate = DateTime.Now;
+                    timeLapsed = (DateTime.Now - lastUpdate).TotalSeconds;
                     Console.Write("\r" + "                 ");
+                    Console.Write("\r" + Math.Floor(5 - timeLapsed).ToString());
                 }
                 else
                 {
-                    Console.Write("\r" + Math.Floor(5 - timeLapsed).ToString());
+                    Console.Write("\r" + Math.Ceiling(5 - timeLapsed).ToString());
                 }
                 Thread.Sleep(1000);
             }

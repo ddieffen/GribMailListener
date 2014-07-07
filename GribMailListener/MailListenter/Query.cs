@@ -28,7 +28,7 @@ namespace MailListenter
         {
             try
             {
-                if (m != null && m.Subject.ToLower().Contains("saildocs query"))
+                if (m != null && m.Subject.ToLower().StartsWith("saildocs:"))
                 {
                     if (m.Body.StartsWith("send") && m.Body.Split(':').Length == 2 && m.Body.Split(',').Length == 4
                         && m.From.Address != "query-reply@saildocs.com")
@@ -42,7 +42,7 @@ namespace MailListenter
                     this.type = QueryType.saildocsanser;
                     return true;
                 }
-                if (m != null && m.Subject.ToLower().Contains("forward-to:"))
+                if (m != null && m.Subject.ToLower().StartsWith("forward:"))
                 {
                     this.type = QueryType.forward;
                     return true;
@@ -115,8 +115,8 @@ namespace MailListenter
                         string message = "This service allows you to: \r\n"
                         + "- Request GRIB files from the saildocs.com service\r\n"
                         + "- Forward an email to one or more recipients from this service \r\n\r\n"
-                        + "To request a GRIB file, type in the subject 'saildocs query' only, and in the body your query such as 'send coamps:36N,46N,100W,75W' in order to get the weather for lake michigan\r\n\r\n"
-                        + "To request a foreard, type in the subject 'forward-to:RECIPIENT:SUBJECT' and in the body the body of your message, the message will be delivered to the recipients. If more than one, use comma to separate the email adresses";
+                        + "To request a GRIB file, type in the subject 'saildocs:' only, and in the body your query such as 'send coamps:36N,46N,100W,75W' in order to get the weather for lake michigan\r\n\r\n"
+                        + "To request a foreard, type in the subject 'forward:RECIPIENT:SUBJECT' and in the body the body of your message, the message will be delivered to the recipients. If more than one, use comma to separate the email adresses";
                         SMTPTools.SendMail(m.From.Address, "Help Response", message);
                         break;
                     default:
