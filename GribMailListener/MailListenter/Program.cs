@@ -16,75 +16,81 @@ namespace MailListenter
     {
         static void Main(string[] args)
         {
-            // Connect to the IMAP server. The 'true' parameter specifies to use SSL
-            // which is important (for Gmail at least)
-            ImapClient ic = IMAPTools.TryIMAP();
-            if (ic == null)
-            {
-                Console.WriteLine("Can't connect to IMAP Server, exiting...");
-                Thread.Sleep(1000);
-                return;
-            }
-
-            SmtpClient sc = SMTPTools.TrySMTP();
-            if (sc == null)
-            {
-                Console.WriteLine("Can't connect to SMTP Server, exiting...");
-                Thread.Sleep(1000);
-                return;
-            }
-
-            // Select a mailbox. Case-insensitive
-            ic.SelectMailbox("INBOX");
-
-            int count = ic.GetMessageCount();
-            List<string> awaiting = new List<string>();
-            DateTime lastUpdate = new DateTime(1970,1,1);
-
+            ImapClient ic = null;
             while (true)
             {
-                double timeLapsed = (DateTime.Now - lastUpdate).TotalSeconds;
-                if (timeLapsed > 5)
+                try
                 {
-                    Console.Write("\r" + "Checking inbox...");
-                    // Get the first *11* messages. 0 is the first message;
-                    // and it also includes the 10th message, which is really the eleventh ;)
-                    // MailMessage represents, well, a message in your mailbox
-                    try
-                    {
-                        AE.Net.Mail.MailMessage[] mm = ic.GetMessages(MailListenter.Properties.Settings.Default.lastfetchuid, "*", false);
+                    // Connect to the IMAP server. The 'true' parameter specifies to use SSL
+                    // which is important (for Gmail at least)
+                    IMAPTools.TryIMAP();
+                    SMTPTools.TrySMTP();
 
-                        foreach (AE.Net.Mail.MailMessage m in mm)
-                        {
-                            if (!m.Uid.Equals(MailListenter.Properties.Settings.Default.lastfetchuid))
-                            {
-                                Query q = new Query(m, awaiting);
-                                if (q.isValid())
-                                {
-                                    string result = q.execute();
-                                    Console.WriteLine("\r" + DateTime.Now.ToString() + " Executing Request:" + q.ToString());
-                                    if (result != "")
-                                        awaiting.Add(result);
-                                }
-                            }
-                            MailListenter.Properties.Settings.Default.lastfetchuid = m.Uid;
-                            MailListenter.Properties.Settings.Default.Save();
-                        }
-                    }
-                    catch (Exception e)
+                    ic = new ImapClient(
+                               MailListenter.Properties.Settings.Default.imapserver,
+                               MailListenter.Properties.Settings.Default.imapuser,
+                               SecurityTools.ToInsecureString(SecurityTools.DecryptString(MailListenter.Properties.Settings.Default.imappassword)),
+                               AuthMethods.Login,
+                               MailListenter.Properties.Settings.Default.imapport,
+                               true);
+
+                    ic.SelectMailbox("INBOX");// Select a mailbox. Case-insensitive
+
+                    int count = ic.GetMessageCount();
+                    List<string> awaiting = new List<string>();
+                    DateTime lastUpdate = new DateTime(1970, 1, 1);
+
+                    while (true)
                     {
-                        Console.WriteLine("Exception Occured: " + e.Message);
+                        double timeLapsed = (DateTime.Now - lastUpdate).TotalSeconds;
+                        if (timeLapsed > 5)
+                        {
+                            Console.Write("\r" + "Checking inbox...");
+                            // Get the first *11* messages. 0 is the first message;
+                            // and it also includes the 10th message, which is really the eleventh ;)
+                            // MailMessage represents, well, a message in your mailbox
+
+                            AE.Net.Mail.MailMessage[] mm = ic.GetMessages(MailListenter.Properties.Settings.Default.lastfetchuid, "*", false);
+
+                            foreach (AE.Net.Mail.MailMessage m in mm)
+                            {
+                                if (!m.Uid.Equals(MailListenter.Properties.Settings.Default.lastfetchuid))
+                                {
+                                    Query q = new Query(m, awaiting);
+                                    if (q.isValid())
+                                    {
+                                        string result = q.execute();
+                                        Console.WriteLine("\r" + DateTime.Now.ToString() + " Executing Request:" + q.ToString());
+                                        if (result != "")
+                                            awaiting.Add(result);
+                                    }
+                                }
+                                MailListenter.Properties.Settings.Default.lastfetchuid = m.Uid;
+                                MailListenter.Properties.Settings.Default.Save();
+                            }
+                           
+                            lastUpdate = DateTime.Now;
+                            timeLapsed = (DateTime.Now - lastUpdate).TotalSeconds;
+                            Console.Write("\r" + "                 ");
+                            Console.Write("\r" + Math.Floor(5 - timeLapsed).ToString());
+                        }
+                        else
+                        {
+                            Console.Write("\r" + Math.Ceiling(5 - timeLapsed).ToString());
+                        }
+                        Thread.Sleep(1000);
                     }
-                    lastUpdate = DateTime.Now;
-                    timeLapsed = (DateTime.Now - lastUpdate).TotalSeconds;
-                    Console.Write("\r" + "                 ");
-                    Console.Write("\r" + Math.Floor(5 - timeLapsed).ToString());
                 }
-                else
+                catch(Exception e)
                 {
-                    Console.Write("\r" + Math.Ceiling(5 - timeLapsed).ToString());
+                    Console.WriteLine(DateTime.Now.ToString() + " Something went wrong: " + e.Message);
                 }
-                Thread.Sleep(1000);
+                finally
+                {
+                    if (ic == null)
+                        Console.WriteLine("Cannot connect IMAP Client...");
+                }
+                Thread.Sleep(5000);
             }
         }
     }

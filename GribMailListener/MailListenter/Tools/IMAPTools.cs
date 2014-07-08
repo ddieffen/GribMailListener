@@ -8,27 +8,20 @@ namespace MailListenter
 {
     internal static class IMAPTools
     {
-        internal static ImapClient TryIMAP()
+        internal static void TryIMAP()
         {
-            ImapClient ic = null;
-            int errorsCount = 0;
-            while (ic == null && errorsCount < 3)
+            bool haveInfo = false;
+            while (!haveInfo)
             {
-                try
+                if(!String.IsNullOrEmpty(MailListenter.Properties.Settings.Default.imapserver)
+                    && !String.IsNullOrEmpty(MailListenter.Properties.Settings.Default.imapport.ToString())
+                    && !String.IsNullOrEmpty(MailListenter.Properties.Settings.Default.imapuser)
+                    && !String.IsNullOrEmpty(MailListenter.Properties.Settings.Default.imappassword))
                 {
-                    ic = new ImapClient(
-                        MailListenter.Properties.Settings.Default.imapserver,
-                        MailListenter.Properties.Settings.Default.imapuser,
-                        SecurityTools.ToInsecureString(SecurityTools.DecryptString(MailListenter.Properties.Settings.Default.imappassword)),
-                        AuthMethods.Login,
-                        MailListenter.Properties.Settings.Default.imapport,
-                        true);
-                    Console.WriteLine("Connection to IMAP server Succeeded!");
-                    return ic;
+                    haveInfo = true;
                 }
-                catch
+                else
                 {
-                    errorsCount++;
                     Console.WriteLine("Invalid IMAP configuration, please re-enter information");
                     Console.WriteLine("Please enter imap server address (example: imap.gmail.com):");
                     MailListenter.Properties.Settings.Default.imapserver = Console.ReadLine();
@@ -63,7 +56,6 @@ namespace MailListenter
                     MailListenter.Properties.Settings.Default.Save();
                 }
             }
-            return null;
         }
     }
 }

@@ -55,28 +55,20 @@ namespace MailListenter
             }
         }
 
-        internal static SmtpClient TrySMTP()
+        internal static void TrySMTP()
         {
-            SmtpClient smtp = null;
-            int errorsCount = 0;
-            while (smtp == null && errorsCount < 3)
+            bool haveInfo = false;
+            while (!haveInfo)
             {
-                try
+                if (!String.IsNullOrEmpty(MailListenter.Properties.Settings.Default.smtpserver)
+                       && !String.IsNullOrEmpty(MailListenter.Properties.Settings.Default.smtpport.ToString())
+                       && !String.IsNullOrEmpty(MailListenter.Properties.Settings.Default.smtpuser)
+                       && !String.IsNullOrEmpty(MailListenter.Properties.Settings.Default.smtppassword))
                 {
-                    smtp = new SmtpClient(MailListenter.Properties.Settings.Default.smtpserver,
-                        MailListenter.Properties.Settings.Default.smtpport);
-
-                    smtp.Credentials = new NetworkCredential(MailListenter.Properties.Settings.Default.smtpuser
-                            , SecurityTools.ToInsecureString(SecurityTools.DecryptString(MailListenter.Properties.Settings.Default.smtppassword)));
-
-                    ServicePoint sp = smtp.ServicePoint;
-
-                    Console.WriteLine("Connection to SMTP server Succeeded!");
-                    return smtp;
+                    haveInfo = true;
                 }
-                catch
+                else
                 {
-                    errorsCount++;
                     Console.WriteLine("Invalid SMTP configuration, please re-enter information");
                     Console.WriteLine("Please enter SMTP server address (example: smtp.gmail.com):");
                     MailListenter.Properties.Settings.Default.smtpserver = Console.ReadLine();
@@ -111,8 +103,6 @@ namespace MailListenter
                     MailListenter.Properties.Settings.Default.Save();
                 }
             }
-            return null;
         }
-
     }
 }
