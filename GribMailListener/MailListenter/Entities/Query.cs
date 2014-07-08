@@ -129,7 +129,7 @@ namespace MailListenter
                             string report = "Race name: ";
                             string[] split = m.Subject.Split(new char[]{':'},2);
                             Race race = YBTracker.getRaceInformation("http://yb.tl", split[1]);
-                            report += race.title + "========================\r\n\r\n";
+                            report += race.title + "\r\n========================\r\n\r\n";
                             foreach (Tag tag in race.tags)
                             {
                                 report += tag.id + " - " + tag.name + "\r\n" + "----------------------\r\n";
