@@ -63,6 +63,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Tools\GRIBTools.cs" />
+    <Compile Include="Tools\HTMLTools.cs" />
     <Compile Include="Tools\SMTPTools.cs" />
     <Compile Include="Tools\IMAPTools.cs" />
     <Compile Include="Program.cs" />
