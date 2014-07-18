@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using MailListenter;
 using System.Net.Mail;
 using System.Net;
+using Tweetinvi;
 
 namespace MailListenter
 {
@@ -21,6 +22,8 @@ namespace MailListenter
             {
                 try
                 {
+                    TwitterCredentials.SetCredentials("", "", "", "");
+
                     // Connect to the IMAP server. The 'true' parameter specifies to use SSL
                     // which is important (for Gmail at least)
                     IMAPTools.TryIMAP();

@@ -18,8 +18,11 @@ namespace MailListenter
             bool isBodyHTML = false,
             string[] attachements = null)
         {
-
             bool enableSSL = true;
+
+            if (attachements != null && attachements.Length > 0
+                && emailTo.Contains("@mailasail.com"))
+                emailTo = emailTo.Replace("@mailasail.com", "+attach@mailasail.com");
 
             using (MailMessage mail = new MailMessage())
             {

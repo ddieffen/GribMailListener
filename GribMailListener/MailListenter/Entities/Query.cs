@@ -6,12 +6,13 @@ using System.IO;
 using YellowbrickV6;
 using YellowbrickV6.Entities;
 using System.Net;
+using Tweetinvi;
 
 namespace MailListenter
 {
     internal class Query
     {
-        internal enum QueryType { saildocs, saildocsanser, forward, help, raceinfo, sectioninfo, grib };
+        internal enum QueryType { saildocs, saildocsanser, forward, help, raceinfo, sectioninfo, grib, tweet };
 
         internal AE.Net.Mail.MailMessage m;
         internal QueryType type;
@@ -38,7 +39,7 @@ namespace MailListenter
             {
                 if (m != null && m.Subject.ToLower().StartsWith("saildocs:"))
                 {
-                    if (m.Body.StartsWith("send") && m.Body.Split(':').Length == 2 && m.Body.Split(',').Length == 4
+                    if (m.Body.Trim("\r\n".ToCharArray()).StartsWith("send") && m.Body.Split(':').Length == 2 && m.Body.Split(',').Length == 4
                         && m.From.Address != "query-reply@saildocs.com")
                     {
                         this.type = QueryType.saildocs;
@@ -75,6 +76,11 @@ namespace MailListenter
                     this.type = QueryType.grib;
                     return true;
                 }
+                if (m != null && m.Subject.StartsWith("tweet:"))
+                {
+                    this.type = QueryType.tweet;
+                    return true;
+                }
                 return false;
             }
             catch 
@@ -89,8 +95,8 @@ namespace MailListenter
             {
                 if (type == QueryType.saildocs)
                 {
-                    SMTPTools.SendMail("query@saildocs.com", m.From.Address, m.Body, false);
-                    return m.From.Address + "," + m.Body;
+                    SMTPTools.SendMail("query@saildocs.com", m.From.Address, m.Body.Trim("\r\n".ToCharArray()), false);
+                    return m.From.Address + "," + m.Body.Trim("\r\n".ToCharArray());
                 }
                 else if (type == QueryType.saildocsanser)
                 {
@@ -183,7 +189,7 @@ namespace MailListenter
                             foreach (Team team in race.teams)
                                 YBTracker.UpdateMomentsSpeedHeading(team);
                             string report = YBTracker.ReportSelectedTeamsHTML(race, sectionId, referenceTeam);
-                            SMTPTools.SendMail(m.From.Address, "Section report for " + tagName, report, true, null);
+                            SMTPTools.SendMail(m.From.Address, "Race Positions at " + DateTime.Now.ToString(), report, true, null);
                         }
                     }
                     catch
@@ -222,6 +228,16 @@ namespace MailListenter
                             foreach (string file in filesForward)
                                 File.Delete(file);
                         }
+                    }
+                    catch { }
+                }
+                else if (type == QueryType.tweet)
+                {
+                    try 
+                    {
+                        string[] split = m.Subject.Split(new char[] { ':' }, 2);
+                        var newTweet = Tweet.CreateTweet(split[1]);
+                        newTweet.Publish();
                     }
                     catch { }
                 }
