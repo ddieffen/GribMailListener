@@ -6,7 +6,6 @@ using System.IO;
 using YellowbrickV6;
 using YellowbrickV6.Entities;
 using System.Net;
-using Tweetinvi;
 
 namespace MailListenter
 {
@@ -236,7 +235,7 @@ namespace MailListenter
                     try 
                     {
                         string[] split = m.Subject.Split(new char[] { ':' }, 2);
-                        var newTweet = Tweet.CreateTweet(split[1]);
+                        var newTweet = Tweetinvi.Tweet.CreateTweet(split[1]);
                         newTweet.Publish();
                     }
                     catch { }
