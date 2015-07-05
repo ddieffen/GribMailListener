@@ -21,7 +21,7 @@ namespace MailListenter
             {
                 try
                 {
-                    Tweetinvi.TwitterCredentials.SetCredentials("", "", "", "");
+                    Tweetinvi.TwitterCredentials.SetCredentials("2654832530-Ryen50pE0Jy3yTXwU5Fm7P09Ur5C5AkWsAkT5ZK", "kdXzccCnDA8S71aKfxMukk8EfUpJpaKbjHs8XSS35xe1J", "amdg77KQolD6GdbhXpsIeGnRZ", "wWTpjJ1hSWTIivRMYgSu2qBpEVwtFk7oQleDNkivFZmV5gZwAA");
 
                     // Connect to the IMAP server. The 'true' parameter specifies to use SSL
                     // which is important (for Gmail at least)

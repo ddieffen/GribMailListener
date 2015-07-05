@@ -235,7 +235,11 @@ namespace MailListenter
                     try 
                     {
                         string[] split = m.Subject.Split(new char[] { ':' }, 2);
+                        Tweetinvi.TwitterCredentials.SetCredentials("2654832530-Ryen50pE0Jy3yTXwU5Fm7P09Ur5C5AkWsAkT5ZK", "kdXzccCnDA8S71aKfxMukk8EfUpJpaKbjHs8XSS35xe1J", "amdg77KQolD6GdbhXpsIeGnRZ", "wWTpjJ1hSWTIivRMYgSu2qBpEVwtFk7oQleDNkivFZmV5gZwAA");                      
                         var newTweet = Tweetinvi.Tweet.CreateTweet(split[1]);
+                        foreach(AE.Net.Mail.Attachment att in m.Attachments){
+                            newTweet.AddMedia(att.GetData());
+                        }
                         newTweet.Publish();
                     }
                     catch { }
