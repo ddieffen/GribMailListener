@@ -6,6 +6,7 @@ using System.IO;
 using YellowbrickV6;
 using YellowbrickV6.Entities;
 using System.Net;
+using Tweetinvi;
 
 namespace MailListenter
 {
@@ -70,15 +71,21 @@ namespace MailListenter
                     this.type = QueryType.sectioninfo;
                     return true;
                 }
-                if (m != null && m.Subject.StartsWith("nam-conus:"))
-                {
-                    this.type = QueryType.grib;
-                    return true;
-                }
                 if (m != null && m.Subject.StartsWith("tweet:"))
                 {
                     this.type = QueryType.tweet;
                     return true;
+                }
+                if (m != null)
+                {
+                    bool test = false;
+                    foreach (String modelName in GRIBTools.KnownModels)
+                        test |= m.Subject.StartsWith(modelName);
+                    if (test)
+                    {
+                        this.type = QueryType.grib;
+                        return true;
+                    }
                 }
                 return false;
             }
@@ -199,15 +206,19 @@ namespace MailListenter
                     try
                     {
                         string message = "This service allows you to: \r\n"
-                        + "- Request GRIB files from the saildocs.com service\r\n"
+                        + "- Request GRIB files \r\n"
                         + "- Forward an email to one or more recipients from this service \r\n"
                         + "- Query a yellowbrick race \r\n"
                         + "- Results for a section of a yellowbrick race \r\n\r\n"
-                        + "To request a GRIB file from saildocs service, type in the subject 'saildocs:' only, and in the body your query such as 'send coamps:36N,46N,100W,75W' in order to get the weather for lake michigan\r\n\r\n"
+                        + "Weather models supported : " + GRIBTools.KnownModels.Aggregate((i, j) => i + ", " + j)
+                        + "To requast a GRIB file for any weather weather model, send a message with a subject like this    nam-conus:-90,-84,47,41:0-12/3,15,18-80/6\r\n\r\n"
+                        + "Where: \r\n"
+                        + "- nam-comus is the desired model\r\n"
+                        + "- -90,-84,47,41 is a rectangle box delimiting the desired resion"
+                        + "- 0-12/3,15,18-80/6 represents the desired times, from +0 to +12 hours every 3 hours, then +15, then from +18 to +80 every 6 hours"
                         + "To request a foreward, type in the subject 'forward:RECIPIENT:SUBJECT' and in the body the body of your message, the message will be delivered to the recipients. If more than one, use comma to separate the email adresses\r\n\r\n"
                         + "To request a yellowbrick race information, put in the subject 'raceinfo:RACE-KEY' where RACE-KEY can be replaced with an existing key\r\n\r\n"
-                        + "To request a report for a yellowbrick race section, put in the subject 'sectioninfo:RACE-KEY:SECTION-ID:REFERENCE-TEAM' where race id is a yellowbrick race id, section is a section id, and reference team is the id of the team used as reference for the report.\r\n\r\n"
-                        + "To requast a subset of the NAM CONUS weather model, send a message with a subject like this: nam-conus:-90,-84,47,41:0-12/3,15,18-80/6\r\n\r\n";
+                        + "To request a report for a yellowbrick race section, put in the subject 'sectioninfo:RACE-KEY:SECTION-ID:REFERENCE-TEAM' where race id is a yellowbrick race id, section is a section id, and reference team is the id of the team used as reference for the report.\r\n\r\n";
                         SMTPTools.SendMail(m.From.Address, "Help Response", message);
                     }
                     catch { }
@@ -217,12 +228,12 @@ namespace MailListenter
                     try
                     {
                         string[] split = m.Subject.Split(new char[] { ':' }, 2);
-                        if (split[0].ToLower().Equals("nam-conus"))
+                        if (GRIBTools.KnownModels.Contains(split[0].ToLower()))
                         {
-                            string filename = GRIBTools.DoNam(m.Subject);
+                            string filename = GRIBTools.DoFilterGrib(m.Subject);
                             List<string> filesForward = new List<string>();
                             filesForward.Add(filename);
-                            SMTPTools.SendMail(m.From.Address, "NAM-CONUS", "", true, filesForward.ToArray());
+                            SMTPTools.SendMail(m.From.Address, split[0].ToLower(), "", true, filesForward.ToArray());
 
                             foreach (string file in filesForward)
                                 File.Delete(file);
@@ -235,8 +246,11 @@ namespace MailListenter
                     try 
                     {
                         string[] split = m.Subject.Split(new char[] { ':' }, 2);
-                        Tweetinvi.TwitterCredentials.SetCredentials("2654832530-Ryen50pE0Jy3yTXwU5Fm7P09Ur5C5AkWsAkT5ZK", "kdXzccCnDA8S71aKfxMukk8EfUpJpaKbjHs8XSS35xe1J", "amdg77KQolD6GdbhXpsIeGnRZ", "wWTpjJ1hSWTIivRMYgSu2qBpEVwtFk7oQleDNkivFZmV5gZwAA");                      
-                        var newTweet = Tweetinvi.Tweet.CreateTweet(split[1]);
+                        if (m.Sender.Address == "teamsorcerer@gmail.com")
+                            TwitterCredentials.SetCredentials("2654832530-Ryen50pE0Jy3yTXwU5Fm7P09Ur5C5AkWsAkT5ZK", "kdXzccCnDA8S71aKfxMukk8EfUpJpaKbjHs8XSS35xe1J", "amdg77KQolD6GdbhXpsIeGnRZ", "wWTpjJ1hSWTIivRMYgSu2qBpEVwtFk7oQleDNkivFZmV5gZwAA");
+                        else
+                            return "We do not have tweeter parameter for that email";
+                        var newTweet = Tweet.CreateTweet(split[1]);
                         foreach(AE.Net.Mail.Attachment att in m.Attachments){
                             newTweet.AddMedia(att.GetData());
                         }

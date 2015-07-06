@@ -38,6 +38,8 @@ namespace MailListenter
             return list;    
         }
 
+        public static List<string> KnownModels = new List<string>() { "nam-comus", "nam-na", "gfs0.25", "gfs0.5", "gfs1.0", "gefs-hi", "gefs-low", "naefs-hi", "naefs-low" };
+
         /// <summary>
         /// Parses a string for a NAM-CONUS weather request
         /// 
@@ -49,15 +51,57 @@ namespace MailListenter
         /// and 18-80 indicates that we want the forecast for 18 to 80 hours with a step of 6 hours
         /// </summary>
         /// <param name="request">Properly formated request</param>
-        internal static string DoNam(string request)
+        internal static string DoFilterGrib(string request)
         {
             string[] splitRequest = request.Split(new char[] { ':' }, 3);
             string modelRequest = splitRequest[0];
             string[] regionRequest = splitRequest[1].Split(new char[] { ',' }, 4);
             string[] timeRequest = splitRequest[2].Split(new char[] { ',' });
 
-            if (modelRequest != "nam-conus")
-                return "Wrong model";
+            string urlDir = "";
+            string urlModel = "";
+            switch (modelRequest) 
+            {
+                case "nam-comus":
+                    urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_nam.pl";
+                    urlModel = urlDir + "?file=";
+                    break;
+                case "nam-na":
+                    urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_nam_na.pl";
+                    urlModel = urlDir + "?file=";
+                    break;
+                case "gfs0.25":
+                    urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_0p25.pl";
+                    urlModel = urlDir + "?file=";
+                    break;
+                case "gfs0.5":
+                    urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_0p50.pl";
+                    urlModel = urlDir + "?file=";
+                    break;
+                case "gfs1.0":
+                    urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_1p00.pl";
+                    urlModel = urlDir + "?file=";
+                    break;
+                case "gefs-hi":
+                    urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_gensbc.pl";
+                    urlModel = urlDir + "?file=";
+                    break;
+                case "gefs-low":
+                    urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_gensbc_ndgd.pl";
+                    urlModel = urlDir + "?file=";
+                    break;
+                case "naefs-hi":
+                    urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_naefsbc.pl";
+                    urlModel = urlDir + "?file=";
+                    break;
+                case "naefs-low":
+                    urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_naefsbc_ndgd.pl";
+                    urlModel = urlDir + "?file=";
+                    break;
+                default:
+                    return "Wrong model";
+            }
+
             if (regionRequest.Length != 4)
                 return "Wrong number of lat lon";
 
@@ -66,8 +110,7 @@ namespace MailListenter
             int topLat = (int)Convert.ToDouble(regionRequest[2]);
             int bottomLat = (int)Convert.ToDouble(regionRequest[3]);
 
-            string urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_nam.pl";
-            string urlModel = "http://nomads.ncep.noaa.gov/cgi-bin/filter_nam.pl?file=";
+           
             string urlParameter = "&lev_10_m_above_ground=on&lev_mean_sea_level=on&var_UGRD=on&var_VGRD=on&var_PRMSL=on&subregion=&leftlon=" 
                 + leftLon + "&rightlon=" + rightLon + "&toplat=" + topLat + "&bottomlat=" + bottomLat + "&dir=";
 
@@ -127,6 +170,7 @@ namespace MailListenter
             File.WriteAllBytes(path, stacked);
             return path;
         }
+
 
         private static List<int> CreateTimes(string[] time)
         {
