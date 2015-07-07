@@ -22,8 +22,6 @@ namespace MailListenter
             {
                 try
                 {
-                    TwitterCredentials.SetCredentials("2654832530-Ryen50pE0Jy3yTXwU5Fm7P09Ur5C5AkWsAkT5ZK", "kdXzccCnDA8S71aKfxMukk8EfUpJpaKbjHs8XSS35xe1J", "amdg77KQolD6GdbhXpsIeGnRZ", "wWTpjJ1hSWTIivRMYgSu2qBpEVwtFk7oQleDNkivFZmV5gZwAA");
-
                     // Connect to the IMAP server. The 'true' parameter specifies to use SSL
                     // which is important (for Gmail at least)
                     IMAPTools.TryIMAP();
@@ -57,15 +55,20 @@ namespace MailListenter
 
                             foreach (AE.Net.Mail.MailMessage m in mm)
                             {
+
                                 if (!m.Uid.Equals(MailListenter.Properties.Settings.Default.lastfetchuid))
                                 {
-                                    Query q = new Query(m, awaiting);
-                                    if (q.isValid())
+                                    if (m != null && m.From != null && m.From.Address != null && (m.From.Address == "teamsorcerer@gmail.com"
+                                        || m.From.Address == "mikepanacek@hotmail.com"))
                                     {
-                                        string result = q.execute();
-                                        Console.WriteLine("\r" + DateTime.Now.ToString() + " Executing Request:" + q.ToString());
-                                        if (result != "")
-                                            awaiting.Add(result);
+                                        Query q = new Query(m, awaiting);
+                                        if (q.isValid())
+                                        {
+                                            string result = q.execute();
+                                            Console.WriteLine("\r" + DateTime.Now.ToString() + " Executing Request:" + q.ToString());
+                                            if (result != "")
+                                                awaiting.Add(result);
+                                        }
                                     }
                                 }
                                 MailListenter.Properties.Settings.Default.lastfetchuid = m.Uid;

@@ -20,7 +20,7 @@ namespace MailListenter
     internal static class GRIBTools
     {
 
-        internal static List<GribTimeFile> DecomposeFromStrings(List<string> files)
+        internal static List<GribTimeFile> DecomposeFromStrings(List<string> files, string modelRequest)
         {
             List<GribTimeFile> list = new List<GribTimeFile>();
 
@@ -28,17 +28,80 @@ namespace MailListenter
             {
                 string[] split = file.Split(new char[] { '.' });
                 GribTimeFile tref = new GribTimeFile();
-                tref.full_name = file;
-                tref.cycle = Convert.ToInt16(split[1].Trim('t').Trim('z'));
-                tref.model = split[0];
-                tref.time =  Convert.ToInt16(split[2].TrimStart("awphys".ToCharArray()));
+                if (modelRequest == "nam-conus")
+                {
+                    tref.full_name = file;
+                    tref.cycle = Convert.ToInt16(split[1].Trim('t').Trim('z'));
+                    tref.model = split[0];
+                    tref.time = Convert.ToInt16(split[2].TrimStart("awphys".ToCharArray()));
+                }
+                else if (modelRequest == "nam-na")
+                {
+                    tref.full_name = file;
+                    tref.cycle = Convert.ToInt16(split[1].Trim('t').Trim('z'));
+                    tref.model = split[0];
+                    tref.time = Convert.ToInt16(split[2].TrimStart("awphys".ToCharArray()));
+                }
+                else if (modelRequest == "gfs0.25")
+                {
+                    tref.full_name = file;
+                    tref.cycle = Convert.ToInt16(split[1].Trim('t').Trim('z'));
+                    tref.model = split[0];
+                    if (split[4] == "anl")
+                        continue;
+                    tref.time = Convert.ToInt16(split[4].TrimStart("f".ToCharArray()));
+                }
+                else if (modelRequest == "gfs0.5")
+                {
+                    tref.full_name = file;
+                    tref.cycle = Convert.ToInt16(split[1].Trim('t').Trim('z'));
+                    tref.model = split[0];
+                    if (split[4] == "anl")
+                        continue;
+                    tref.time = Convert.ToInt16(split[4].TrimStart("f".ToCharArray()));
+                }
+                else if (modelRequest == "gfs1.0")
+                {
+                    tref.full_name = file;
+                    tref.cycle = Convert.ToInt16(split[1].Trim('t').Trim('z'));
+                    tref.model = split[0];
+                    if (split[4] == "anl")
+                        continue;
+                    tref.time = Convert.ToInt16(split[4].TrimStart("f".ToCharArray()));
+                }
+                else if (modelRequest == "gefs-low")
+                {
+                    if (split[0] != "geavg")
+                        continue;
+                    tref.full_name = file;
+                    tref.cycle = Convert.ToInt16(split[1].Trim('t').Trim('z'));
+                    tref.model = split[0];
+                    tref.time = Convert.ToInt16(split[2].Replace("pgrb2a_bcf",""));
+                }
+                else if (modelRequest == "gefs-hi")
+                {
+                    if (split[0] != "geavg")
+                        continue;
+                    tref.full_name = file;
+                    tref.cycle = Convert.ToInt16(split[1].Trim('t').Trim('z'));
+                    tref.model = split[0];
+                    tref.time = Convert.ToInt16(split[2].TrimStart("ndgd_conusf".ToCharArray()));
+                }
+                else if (modelRequest == "naefs-hi")
+                {
+
+                }
+                else if (modelRequest == "naefs-low")
+                {
+
+                }
                 list.Add(tref);
             }
 
             return list;    
         }
 
-        public static List<string> KnownModels = new List<string>() { "nam-comus", "nam-na", "gfs0.25", "gfs0.5", "gfs1.0", "gefs-hi", "gefs-low", "naefs-hi", "naefs-low" };
+        public static List<string> KnownModels = new List<string>() { "nam-conus", "nam-na", "gfs0.25", "gfs0.5", "gfs1.0", "gefs-hi", "gefs-low", "naefs-hi", "naefs-low" };
 
         /// <summary>
         /// Parses a string for a NAM-CONUS weather request
@@ -58,45 +121,69 @@ namespace MailListenter
             string[] regionRequest = splitRequest[1].Split(new char[] { ',' }, 4);
             string[] timeRequest = splitRequest[2].Split(new char[] { ',' });
 
+            int leftLon = (int)Convert.ToDouble(regionRequest[0]);
+            int rightLon = (int)Convert.ToDouble(regionRequest[1]);
+            int topLat = (int)Convert.ToDouble(regionRequest[2]);
+            int bottomLat = (int)Convert.ToDouble(regionRequest[3]);
+
             string urlDir = "";
             string urlModel = "";
+            string urlParameter = "";
             switch (modelRequest) 
             {
-                case "nam-comus":
+                case "nam-conus":
                     urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_nam.pl";
                     urlModel = urlDir + "?file=";
+                    urlParameter = "&lev_10_m_above_ground=on&lev_mean_sea_level=on&var_UGRD=on&var_VGRD=on&var_PRMSL=on&subregion=&leftlon=" 
+                        + leftLon + "&rightlon=" + rightLon + "&toplat=" + topLat + "&bottomlat=" + bottomLat + "&dir=";
                     break;
                 case "nam-na":
                     urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_nam_na.pl";
                     urlModel = urlDir + "?file=";
+                    urlParameter = "&lev_10_m_above_ground=on&lev_mean_sea_level=on&var_UGRD=on&var_VGRD=on&var_PRMSL=on&subregion=&leftlon=" 
+                        + leftLon + "&rightlon=" + rightLon + "&toplat=" + topLat + "&bottomlat=" + bottomLat + "&dir=";
                     break;
                 case "gfs0.25":
                     urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_0p25.pl";
                     urlModel = urlDir + "?file=";
+                    urlParameter = "&lev_10_m_above_ground=on&lev_mean_sea_level=on&var_UGRD=on&var_VGRD=on&var_PRMSL=on&subregion=&leftlon=" 
+                        + leftLon + "&rightlon=" + rightLon + "&toplat=" + topLat + "&bottomlat=" + bottomLat + "&dir=";
                     break;
                 case "gfs0.5":
                     urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_0p50.pl";
                     urlModel = urlDir + "?file=";
+                    urlParameter = "&lev_10_m_above_ground=on&lev_mean_sea_level=on&var_UGRD=on&var_VGRD=on&var_PRMSL=on&subregion=&leftlon=" 
+                        + leftLon + "&rightlon=" + rightLon + "&toplat=" + topLat + "&bottomlat=" + bottomLat + "&dir=";
                     break;
                 case "gfs1.0":
                     urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_1p00.pl";
                     urlModel = urlDir + "?file=";
-                    break;
-                case "gefs-hi":
-                    urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_gensbc.pl";
-                    urlModel = urlDir + "?file=";
+                    urlParameter = "&lev_10_m_above_ground=on&lev_mean_sea_level=on&var_UGRD=on&var_VGRD=on&var_PRMSL=on&subregion=&leftlon=" 
+                        + leftLon + "&rightlon=" + rightLon + "&toplat=" + topLat + "&bottomlat=" + bottomLat + "&dir=";
                     break;
                 case "gefs-low":
+                    urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_gensbc.pl";
+                    urlModel = urlDir + "?file=";
+                    urlParameter = "&lev_10_m_above_ground=on&lev_mean_sea_level=on&var_UGRD=on&var_VGRD=on&var_PRMSL=on&subregion=&leftlon=" 
+                        + leftLon + "&rightlon=" + rightLon + "&toplat=" + topLat + "&bottomlat=" + bottomLat + "&dir=";
+                    break;
+                case "gefs-hi":
                     urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_gensbc_ndgd.pl";
                     urlModel = urlDir + "?file=";
-                    break;
-                case "naefs-hi":
-                    urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_naefsbc.pl";
-                    urlModel = urlDir + "?file=";
+                    urlParameter = "&lev_surface=on&lev_10_m_above_ground=on&var_PRES=on&var_UGRD=on&var_VGRD=on&subregion=&leftlon="
+                        + leftLon + "&rightlon=" + rightLon + "&toplat=" + topLat + "&bottomlat=" + bottomLat + "&dir=";
                     break;
                 case "naefs-low":
+                    urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_naefsbc.pl";
+                    urlModel = urlDir + "?file=";
+                    urlParameter = "&lev_10_m_above_ground=on&lev_mean_sea_level=on&var_UGRD=on&var_VGRD=on&var_PRMSL=on&subregion=&leftlon="
+                        + leftLon + "&rightlon=" + rightLon + "&toplat=" + topLat + "&bottomlat=" + bottomLat + "&dir=";
+                    break;
+                case "naefs-hi":
                     urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_naefsbc_ndgd.pl";
                     urlModel = urlDir + "?file=";
+                    urlParameter = "&lev_surface=on&lev_10_m_above_ground=on&var_PRES=on&var_UGRD=on&var_VGRD=on&subregion=&leftlon="
+                        + leftLon + "&rightlon=" + rightLon + "&toplat=" + topLat + "&bottomlat=" + bottomLat + "&dir=";
                     break;
                 default:
                     return "Wrong model";
@@ -105,26 +192,19 @@ namespace MailListenter
             if (regionRequest.Length != 4)
                 return "Wrong number of lat lon";
 
-            int leftLon = (int)Convert.ToDouble(regionRequest[0]);
-            int rightLon = (int)Convert.ToDouble(regionRequest[1]);
-            int topLat = (int)Convert.ToDouble(regionRequest[2]);
-            int bottomLat = (int)Convert.ToDouble(regionRequest[3]);
-
-           
-            string urlParameter = "&lev_10_m_above_ground=on&lev_mean_sea_level=on&var_UGRD=on&var_VGRD=on&var_PRMSL=on&subregion=&leftlon=" 
-                + leftLon + "&rightlon=" + rightLon + "&toplat=" + topLat + "&bottomlat=" + bottomLat + "&dir=";
-
             //finding the index page with all models
             WebClient w = new WebClient();
             string s = w.DownloadString(urlDir);
 
             //find latest simulation day
-            LinkItem latest = Finder.FindLinks(s)[0];
-
-            //find files
-            s = w.DownloadString(latest.Href);
+            LinkItem latest = new LinkItem();
+            while(s.Contains("Subdirectory"))
+            {
+                latest = Finder.FindLinks(s)[0];
+                s = w.DownloadString(latest.Href);
+            }
             List<string> files = Finder.FindOptionsValues(s);
-            List<GribTimeFile> gribTimes = GRIBTools.DecomposeFromStrings(files);
+            List<GribTimeFile> gribTimes = GRIBTools.DecomposeFromStrings(files, modelRequest);
 
             int maxCycle = 0;
             foreach (GribTimeFile time in gribTimes)
@@ -166,7 +246,7 @@ namespace MailListenter
             }
 
             //writing the file
-            string path = "nam-" + DateTime.Now.ToString("yyyyMMdd-Hmm") + ".grb";
+            string path = modelRequest + "-" + DateTime.Now.ToString("yyyyMMdd-Hmm") + ".grb";
             File.WriteAllBytes(path, stacked);
             return path;
         }

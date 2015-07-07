@@ -460,8 +460,8 @@ namespace AE.Net.Mail {
 				var imapHeaders = Utilities.ParseImapHeader(response.Substring(response.IndexOf('(') + 1));
 				String body = (imapHeaders["BODY[HEADER]"] ?? imapHeaders["BODY[]"]);
 				if (body == null && !uidsonly) {
-					System.Diagnostics.Debugger.Break();
-					RaiseWarning(null, "Expected BODY[] in stream, but received \"" + response + "\"");
+					//System.Diagnostics.Debugger.Break();
+					//RaiseWarning(null, "Expected BODY[] in stream, but received \"" + response + "\"");
 					break;
 				}
 				var size = (uidsonly ? 0 : body.Trim('{', '}').ToInt());
@@ -473,15 +473,15 @@ namespace AE.Net.Mail {
 					response = GetResponse();
 					if (response == null)
 					{
-						System.Diagnostics.Debugger.Break();
-						RaiseWarning(null, "Expected \")\" in stream, but received nothing");
+						//System.Diagnostics.Debugger.Break();
+						//RaiseWarning(null, "Expected \")\" in stream, but received nothing");
 						break;
 					}
 				}
 				var n = response.Trim().LastOrDefault();
 				if (n != ')') {
-					System.Diagnostics.Debugger.Break();
-					RaiseWarning(null, "Expected \")\" in stream, but received \"" + response + "\"");
+					//System.Diagnostics.Debugger.Break();
+					//RaiseWarning(null, "Expected \")\" in stream, but received \"" + response + "\"");
 				}
 			}
 

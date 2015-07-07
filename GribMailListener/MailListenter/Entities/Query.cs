@@ -7,6 +7,16 @@ using YellowbrickV6;
 using YellowbrickV6.Entities;
 using System.Net;
 using Tweetinvi;
+using Tweetinvi.Controllers;
+using Tweetinvi.Core;
+using Tweetinvi.Credentials;
+using Tweetinvi.Factories;
+using Tweetinvi.Injectinvi;
+using Tweetinvi.Json;
+using Tweetinvi.Logic;
+using Tweetinvi.Security;
+using Tweetinvi.Streams;
+using Tweetinvi.WebLogic;
 
 namespace MailListenter
 {
@@ -80,7 +90,7 @@ namespace MailListenter
                 {
                     bool test = false;
                     foreach (String modelName in GRIBTools.KnownModels)
-                        test |= m.Subject.StartsWith(modelName);
+                        test = test || m.Subject.StartsWith(modelName);
                     if (test)
                     {
                         this.type = QueryType.grib;
@@ -250,7 +260,7 @@ namespace MailListenter
                             TwitterCredentials.SetCredentials("2654832530-Ryen50pE0Jy3yTXwU5Fm7P09Ur5C5AkWsAkT5ZK", "kdXzccCnDA8S71aKfxMukk8EfUpJpaKbjHs8XSS35xe1J", "amdg77KQolD6GdbhXpsIeGnRZ", "wWTpjJ1hSWTIivRMYgSu2qBpEVwtFk7oQleDNkivFZmV5gZwAA");
                         else
                             return "We do not have tweeter parameter for that email";
-                        var newTweet = Tweet.CreateTweet(split[1]);
+                        var newTweet = Tweetinvi.Tweet.CreateTweet(split[1]);
                         foreach(AE.Net.Mail.Attachment att in m.Attachments){
                             newTweet.AddMedia(att.GetData());
                         }
