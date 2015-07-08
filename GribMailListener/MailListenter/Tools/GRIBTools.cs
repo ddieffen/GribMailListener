@@ -40,7 +40,7 @@ namespace MailListenter
                     tref.full_name = file;
                     tref.cycle = Convert.ToInt16(split[1].Trim('t').Trim('z'));
                     tref.model = split[0];
-                    tref.time = Convert.ToInt16(split[2].TrimStart("awphys".ToCharArray()));
+                    tref.time = Convert.ToInt16(split[2].Replace("awip32",""));
                 }
                 else if (modelRequest == "gfs0.25")
                 {
@@ -69,7 +69,7 @@ namespace MailListenter
                         continue;
                     tref.time = Convert.ToInt16(split[4].TrimStart("f".ToCharArray()));
                 }
-                else if (modelRequest == "gefs-low")
+                else if (modelRequest == "gefs-low-avg")
                 {
                     if (split[0] != "geavg")
                         continue;
@@ -78,7 +78,16 @@ namespace MailListenter
                     tref.model = split[0];
                     tref.time = Convert.ToInt16(split[2].Replace("pgrb2a_bcf",""));
                 }
-                else if (modelRequest == "gefs-hi")
+                else if (modelRequest == "gefs-low-mode")
+                {
+                    if (split[0] != "gemode")
+                        continue;
+                    tref.full_name = file;
+                    tref.cycle = Convert.ToInt16(split[1].Trim('t').Trim('z'));
+                    tref.model = split[0];
+                    tref.time = Convert.ToInt16(split[2].Replace("pgrb2a_bcf", ""));
+                }
+                else if (modelRequest == "gefs-hi-avg")
                 {
                     if (split[0] != "geavg")
                         continue;
@@ -87,13 +96,50 @@ namespace MailListenter
                     tref.model = split[0];
                     tref.time = Convert.ToInt16(split[2].TrimStart("ndgd_conusf".ToCharArray()));
                 }
-                else if (modelRequest == "naefs-hi")
+                else if (modelRequest == "gefs-hi-mode")
                 {
-
+                    if (split[0] != "gemode")
+                        continue;
+                    tref.full_name = file;
+                    tref.cycle = Convert.ToInt16(split[1].Trim('t').Trim('z'));
+                    tref.model = split[0];
+                    tref.time = Convert.ToInt16(split[2].TrimStart("ndgd_conusf".ToCharArray()));
                 }
-                else if (modelRequest == "naefs-low")
+                else if (modelRequest == "naefs-low-avg")
                 {
-
+                    if (split[0] != "naefs_geavg")
+                        continue;
+                    tref.full_name = file;
+                    tref.cycle = Convert.ToInt16(split[1].Trim('t').Trim('z'));
+                    tref.model = split[0];
+                    tref.time = Convert.ToInt16(split[2].Replace("pgrb2a_bcf", ""));
+                }
+                else if (modelRequest == "naefs-low-mode")
+                {
+                    if (split[0] != "naefs_gemode")
+                        continue;
+                    tref.full_name = file;
+                    tref.cycle = Convert.ToInt16(split[1].Trim('t').Trim('z'));
+                    tref.model = split[0];
+                    tref.time = Convert.ToInt16(split[2].Replace("pgrb2a_bcf", ""));
+                }
+                else if (modelRequest == "naefs-hi-avg")
+                {
+                    if (split[0] != "naefs_geavg")
+                        continue;
+                    tref.full_name = file;
+                    tref.cycle = Convert.ToInt16(split[1].Trim('t').Trim('z'));
+                    tref.model = split[0];
+                    tref.time = Convert.ToInt16(split[2].Replace("ndgd_conusf", ""));
+                }
+                else if (modelRequest == "naefs-hi-mode")
+                {
+                    if (split[0] != "naefs_gemode")
+                        continue;
+                    tref.full_name = file;
+                    tref.cycle = Convert.ToInt16(split[1].Trim('t').Trim('z'));
+                    tref.model = split[0];
+                    tref.time = Convert.ToInt16(split[2].Replace("ndgd_conusf", ""));
                 }
                 list.Add(tref);
             }
@@ -101,7 +147,7 @@ namespace MailListenter
             return list;    
         }
 
-        public static List<string> KnownModels = new List<string>() { "nam-conus", "nam-na", "gfs0.25", "gfs0.5", "gfs1.0", "gefs-hi", "gefs-low", "naefs-hi", "naefs-low" };
+        public static List<string> KnownModels = new List<string>() { "nam-conus", "nam-na", "gfs0.25", "gfs0.5", "gfs1.0", "gefs-hi-avg", "gefs-low-avg", "naefs-hi-avg", "naefs-low-avg", "gefs-hi-mode", "gefs-low-mode", "naefs-hi-mode", "naefs-low-mode" };
 
         /// <summary>
         /// Parses a string for a NAM-CONUS weather request
@@ -114,8 +160,9 @@ namespace MailListenter
         /// and 18-80 indicates that we want the forecast for 18 to 80 hours with a step of 6 hours
         /// </summary>
         /// <param name="request">Properly formated request</param>
-        internal static string DoFilterGrib(string request)
+        internal static string DoFilterGrib(string request, out List<string> errorsAndWarnings)
         {
+            errorsAndWarnings = new List<string>();
             string[] splitRequest = request.Split(new char[] { ':' }, 3);
             string modelRequest = splitRequest[0];
             string[] regionRequest = splitRequest[1].Split(new char[] { ',' }, 4);
@@ -161,25 +208,49 @@ namespace MailListenter
                     urlParameter = "&lev_10_m_above_ground=on&lev_mean_sea_level=on&var_UGRD=on&var_VGRD=on&var_PRMSL=on&subregion=&leftlon=" 
                         + leftLon + "&rightlon=" + rightLon + "&toplat=" + topLat + "&bottomlat=" + bottomLat + "&dir=";
                     break;
-                case "gefs-low":
+                case "gefs-low-avg":
                     urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_gensbc.pl";
                     urlModel = urlDir + "?file=";
                     urlParameter = "&lev_10_m_above_ground=on&lev_mean_sea_level=on&var_UGRD=on&var_VGRD=on&var_PRMSL=on&subregion=&leftlon=" 
                         + leftLon + "&rightlon=" + rightLon + "&toplat=" + topLat + "&bottomlat=" + bottomLat + "&dir=";
                     break;
-                case "gefs-hi":
+                case "gefs-low-mode":
+                    urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_gensbc.pl";
+                    urlModel = urlDir + "?file=";
+                    urlParameter = "&lev_10_m_above_ground=on&lev_mean_sea_level=on&var_UGRD=on&var_VGRD=on&var_PRMSL=on&subregion=&leftlon="
+                        + leftLon + "&rightlon=" + rightLon + "&toplat=" + topLat + "&bottomlat=" + bottomLat + "&dir=";
+                    break;
+                case "gefs-hi-avg":
                     urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_gensbc_ndgd.pl";
                     urlModel = urlDir + "?file=";
                     urlParameter = "&lev_surface=on&lev_10_m_above_ground=on&var_PRES=on&var_UGRD=on&var_VGRD=on&subregion=&leftlon="
                         + leftLon + "&rightlon=" + rightLon + "&toplat=" + topLat + "&bottomlat=" + bottomLat + "&dir=";
                     break;
-                case "naefs-low":
+                case "gefs-hi-mode":
+                    urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_gensbc_ndgd.pl";
+                    urlModel = urlDir + "?file=";
+                    urlParameter = "&lev_surface=on&lev_10_m_above_ground=on&var_PRES=on&var_UGRD=on&var_VGRD=on&subregion=&leftlon="
+                        + leftLon + "&rightlon=" + rightLon + "&toplat=" + topLat + "&bottomlat=" + bottomLat + "&dir=";
+                    break;
+                case "naefs-low-avg":
                     urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_naefsbc.pl";
                     urlModel = urlDir + "?file=";
                     urlParameter = "&lev_10_m_above_ground=on&lev_mean_sea_level=on&var_UGRD=on&var_VGRD=on&var_PRMSL=on&subregion=&leftlon="
                         + leftLon + "&rightlon=" + rightLon + "&toplat=" + topLat + "&bottomlat=" + bottomLat + "&dir=";
                     break;
-                case "naefs-hi":
+                case "naefs-low-mode":
+                    urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_naefsbc.pl";
+                    urlModel = urlDir + "?file=";
+                    urlParameter = "&lev_10_m_above_ground=on&lev_mean_sea_level=on&var_UGRD=on&var_VGRD=on&var_PRMSL=on&subregion=&leftlon="
+                        + leftLon + "&rightlon=" + rightLon + "&toplat=" + topLat + "&bottomlat=" + bottomLat + "&dir=";
+                    break;
+                case "naefs-hi-avg":
+                    urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_naefsbc_ndgd.pl";
+                    urlModel = urlDir + "?file=";
+                    urlParameter = "&lev_surface=on&lev_10_m_above_ground=on&var_PRES=on&var_UGRD=on&var_VGRD=on&subregion=&leftlon="
+                        + leftLon + "&rightlon=" + rightLon + "&toplat=" + topLat + "&bottomlat=" + bottomLat + "&dir=";
+                    break;
+                case "naefs-hi-mode":
                     urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_naefsbc_ndgd.pl";
                     urlModel = urlDir + "?file=";
                     urlParameter = "&lev_surface=on&lev_10_m_above_ground=on&var_PRES=on&var_UGRD=on&var_VGRD=on&subregion=&leftlon="
@@ -204,6 +275,8 @@ namespace MailListenter
                 s = w.DownloadString(latest.Href);
             }
             List<string> files = Finder.FindOptionsValues(s);
+            if (files.Count == 0)
+                errorsAndWarnings.Add("WARNING: Cannot find any files for " + latest + ". Probably the NOAA has not started uploading the files.");
             List<GribTimeFile> gribTimes = GRIBTools.DecomposeFromStrings(files, modelRequest);
 
             int maxCycle = 0;
@@ -211,14 +284,49 @@ namespace MailListenter
                 if (time.cycle > maxCycle)
                     maxCycle = time.cycle;
 
+            string simulationDate = DateTime.Now.ToString("yyyyMMdd-Hmm");
+            switch (modelRequest)
+            {
+                case "nam-conus":
+                    simulationDate = latest.Href.Substring(latest.Href.Length-8,8);
+                    break;
+                case "nam-na":
+                    break;
+                case "gfs0.25":
+                    break;
+                case "gfs0.5":
+                    break;
+                case "gfs1.0":
+                    break;
+                case "gefs-low-avg":
+                    break;
+                case "gefs-low-mode":
+                    break;
+                case "gefs-hi-avg":
+                    break;
+                case "gefs-hi-mode":
+                    break;
+                case "naefs-low-avg":
+                    break;
+                case "naefs-low-mode":
+                    break;
+                case "naefs-hi-avg":
+                    break;
+                case "naefs-hi-mode":
+                    break;
+            }
+
+
             //download all binary files
             List<GribTimeFile> downloaded = new List<GribTimeFile>();
             int futureStackSize = 0;
             List<int> cycleTimes = CreateTimes(timeRequest);
+            List<int> cycleFound = new List<int>();
             foreach (GribTimeFile file in gribTimes.Where(t => t.cycle == maxCycle))
             {
                 if (cycleTimes.Contains(file.time))
                 {
+                    cycleFound.Add(file.time);
                     string url = urlModel
                         + file.full_name
                         + urlParameter
@@ -236,6 +344,16 @@ namespace MailListenter
                 }
             }
 
+            if (files.Count != 0 && cycleTimes.Count != cycleFound.Count) {
+                string missing = "";
+                foreach (int i in cycleTimes)
+                {
+                    if (!cycleFound.Contains(i))
+                        missing += i.ToString() + ", ";
+                }
+                errorsAndWarnings.Add("Warning required time missing T+:" + missing.TrimEnd(','));
+            }
+
             //stacking grib files
             byte[] stacked = new byte[futureStackSize];
             int currentPosition = 0;
@@ -246,11 +364,10 @@ namespace MailListenter
             }
 
             //writing the file
-            string path = modelRequest + "-" + DateTime.Now.ToString("yyyyMMdd-Hmm") + ".grb";
+            string path = modelRequest + "-" + simulationDate + "T" + maxCycle + ".grb";
             File.WriteAllBytes(path, stacked);
             return path;
         }
-
 
         private static List<int> CreateTimes(string[] time)
         {

@@ -221,11 +221,11 @@ namespace MailListenter
                         + "- Query a yellowbrick race \r\n"
                         + "- Results for a section of a yellowbrick race \r\n\r\n"
                         + "Weather models supported : " + GRIBTools.KnownModels.Aggregate((i, j) => i + ", " + j)
-                        + "To requast a GRIB file for any weather weather model, send a message with a subject like this    nam-conus:-90,-84,47,41:0-12/3,15,18-80/6\r\n\r\n"
+                        + "To requast a GRIB file for any weather weather model, send a message with a subject like this nam-conus:-90,-84,47,41:0-12/3,15,18-80/6\r\n\r\n"
                         + "Where: \r\n"
                         + "- nam-comus is the desired model\r\n"
                         + "- -90,-84,47,41 is a rectangle box delimiting the desired resion"
-                        + "- 0-12/3,15,18-80/6 represents the desired times, from +0 to +12 hours every 3 hours, then +15, then from +18 to +80 every 6 hours"
+                        + "- 0-12/3,15,18-80/6 represents the desired times, from +0 to +12 hours every 3 hours, then +15, then from +18 to +80 every 6 hours\r\n\r\n"
                         + "To request a foreward, type in the subject 'forward:RECIPIENT:SUBJECT' and in the body the body of your message, the message will be delivered to the recipients. If more than one, use comma to separate the email adresses\r\n\r\n"
                         + "To request a yellowbrick race information, put in the subject 'raceinfo:RACE-KEY' where RACE-KEY can be replaced with an existing key\r\n\r\n"
                         + "To request a report for a yellowbrick race section, put in the subject 'sectioninfo:RACE-KEY:SECTION-ID:REFERENCE-TEAM' where race id is a yellowbrick race id, section is a section id, and reference team is the id of the team used as reference for the report.\r\n\r\n";
@@ -240,10 +240,14 @@ namespace MailListenter
                         string[] split = m.Subject.Split(new char[] { ':' }, 2);
                         if (GRIBTools.KnownModels.Contains(split[0].ToLower()))
                         {
-                            string filename = GRIBTools.DoFilterGrib(m.Subject);
+                            List<string> errorAndWarnings = new List<string>();
+                            string filename = GRIBTools.DoFilterGrib(m.Subject, out errorAndWarnings);
+                            FileInfo fi = new FileInfo(filename);
+                            string bodyMessage = errorAndWarnings.Aggregate((i, j) => i + Environment.NewLine + j);
                             List<string> filesForward = new List<string>();
                             filesForward.Add(filename);
-                            SMTPTools.SendMail(m.From.Address, split[0].ToLower(), "", true, filesForward.ToArray());
+                            
+                            SMTPTools.SendMail(m.From.Address, split[0].ToLower(), bodyMessage, true, filesForward.ToArray());
 
                             foreach (string file in filesForward)
                                 File.Delete(file);
