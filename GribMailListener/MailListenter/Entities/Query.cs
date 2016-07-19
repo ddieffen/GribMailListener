@@ -1,22 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.IO;
-using YellowbrickV6;
-using YellowbrickV6.Entities;
-using System.Net;
+using YellowbrickV8;
+using YellowbrickV8.Entities;
 using Tweetinvi;
-using Tweetinvi.Controllers;
-using Tweetinvi.Core;
-using Tweetinvi.Credentials;
-using Tweetinvi.Factories;
-using Tweetinvi.Injectinvi;
-using Tweetinvi.Json;
-using Tweetinvi.Logic;
-using Tweetinvi.Security;
-using Tweetinvi.Streams;
-using Tweetinvi.WebLogic;
+using Tweetinvi.Parameters;
+using Tweetinvi.Models;
 
 namespace MailListenter
 {
@@ -34,7 +24,7 @@ namespace MailListenter
         /// <param name="p"></param>
         public Query(AE.Net.Mail.MailMessage message, List<string> awaiting)
         {
-            this.m = message;
+            m = message;
             this.awaiting = awaiting;
         }
 
@@ -52,38 +42,38 @@ namespace MailListenter
                     if (m.Body.Trim("\r\n".ToCharArray()).StartsWith("send") && m.Body.Split(':').Length == 2 && m.Body.Split(',').Length == 4
                         && m.From.Address != "query-reply@saildocs.com")
                     {
-                        this.type = QueryType.saildocs;
+                        type = QueryType.saildocs;
                         return true;
                     }
                 }
                 if (m != null && m.From != null && m.From.Address == "query-reply@saildocs.com")
                 {
-                    this.type = QueryType.saildocsanser;
+                    type = QueryType.saildocsanser;
                     return true;
                 }
                 if (m != null && m.Subject.ToLower().StartsWith("forward:"))
                 {
-                    this.type = QueryType.forward;
+                    type = QueryType.forward;
                     return true;
                 }
-                if (m != null && String.Equals(m.Subject, "help"))
+                if (m != null && string.Equals(m.Subject, "help"))
                 {
-                    this.type = QueryType.help;
+                    type = QueryType.help;
                     return true;
                 }
                 if(m != null && m.Subject.StartsWith("raceinfo:"))
                 {
-                    this.type = QueryType.raceinfo;
+                    type = QueryType.raceinfo;
                     return true;
                 }
                 if (m != null && m.Subject.StartsWith("sectioninfo:"))
                 {
-                    this.type = QueryType.sectioninfo;
+                    type = QueryType.sectioninfo;
                     return true;
                 }
                 if (m != null && m.Subject.StartsWith("tweet:"))
                 {
-                    this.type = QueryType.tweet;
+                    type = QueryType.tweet;
                     return true;
                 }
                 if (m != null)
@@ -93,7 +83,7 @@ namespace MailListenter
                         test = test || m.Subject.StartsWith(modelName);
                     if (test)
                     {
-                        this.type = QueryType.grib;
+                        type = QueryType.grib;
                         return true;
                     }
                 }
@@ -118,7 +108,7 @@ namespace MailListenter
                 {
                     string recipient = "";
                     string selection = "";
-                    if (this.awaiting != null)
+                    if (awaiting != null)
                     {
                         foreach (string waiting in awaiting)
                         {
@@ -165,16 +155,16 @@ namespace MailListenter
                         string report = "Race name: ";
                         string[] split = m.Subject.Split(new char[] { ':' }, 2);
                         Race race = YBTracker.getRaceInformation("http://yb.tl", split[1]);
-                        report += race.title + "\r\n========================\r\n\r\n";
+                        report += race.title + "\r\n========================"+Environment.NewLine+Environment.NewLine;
                         foreach (Tag tag in race.tags)
                         {
-                            report += tag.id + " - " + tag.name + "\r\n" + "----------------------\r\n";
+                            report += tag.id + " - " + tag.name +Environment.NewLine + "----------------------"+Environment.NewLine;
                             foreach (Team team in race.teams)
                             {
                                 if (team.tags.Contains(tag.id))
-                                    report += team.id + " - " + team.name + "\r\n";
+                                    report += team.id + " - " + team.name +Environment.NewLine;
                             }
-                            report += "\r\n";
+                            report += ""+Environment.NewLine;
                         }
                         SMTPTools.SendMail(m.From.Address, "Race report for " + split[1], report, false, null);
                     }
@@ -187,8 +177,8 @@ namespace MailListenter
                     {
                         string[] split = m.Subject.Split(new char[] { ':' }, 4);
                         int sectionId = -1; int referenceTeam = -1;
-                        if (Int32.TryParse(split[2], out sectionId)
-                            && Int32.TryParse(split[3], out referenceTeam))
+                        if (int.TryParse(split[2], out sectionId)
+                            && int.TryParse(split[3], out referenceTeam))
                         {
                             Race race = YBTracker.getRaceInformation("http://yb.tl", split[1]);
                             string tagName = "";
@@ -215,20 +205,23 @@ namespace MailListenter
                 {
                     try
                     {
-                        string message = "This service allows you to: \r\n"
-                        + "- Request GRIB files \r\n"
-                        + "- Forward an email to one or more recipients from this service \r\n"
-                        + "- Query a yellowbrick race \r\n"
-                        + "- Results for a section of a yellowbrick race \r\n\r\n"
+                        string message = "This service allows you to: " + Environment.NewLine
+                        + "- Request GRIB files " + Environment.NewLine
+                        + "- Forward an email to one or more recipients from this service " + Environment.NewLine
+                        + "- Query a yellowbrick race " + Environment.NewLine
+                        + "- Results for a section of a yellowbrick race " + Environment.NewLine
+                        + "- Send tweet messages" + Environment.NewLine + Environment.NewLine
                         + "Weather models supported : " + GRIBTools.KnownModels.Aggregate((i, j) => i + ", " + j)
-                        + "To requast a GRIB file for any weather weather model, send a message with a subject like this nam-conus:-90,-84,47,41:0-12/3,15,18-80/6\r\n\r\n"
-                        + "Where: \r\n"
-                        + "- nam-comus is the desired model\r\n"
-                        + "- -90,-84,47,41 is a rectangle box delimiting the desired resion"
-                        + "- 0-12/3,15,18-80/6 represents the desired times, from +0 to +12 hours every 3 hours, then +15, then from +18 to +80 every 6 hours\r\n\r\n"
-                        + "To request a foreward, type in the subject 'forward:RECIPIENT:SUBJECT' and in the body the body of your message, the message will be delivered to the recipients. If more than one, use comma to separate the email adresses\r\n\r\n"
-                        + "To request a yellowbrick race information, put in the subject 'raceinfo:RACE-KEY' where RACE-KEY can be replaced with an existing key\r\n\r\n"
-                        + "To request a report for a yellowbrick race section, put in the subject 'sectioninfo:RACE-KEY:SECTION-ID:REFERENCE-TEAM' where race id is a yellowbrick race id, section is a section id, and reference team is the id of the team used as reference for the report.\r\n\r\n";
+                        + "To request a GRIB file from the NOAA servers for any weather weather model, send a message with a subject like this nam-conus:-90,-84,47,41:0-12/3,15,18-80/6" + Environment.NewLine + Environment.NewLine
+                        + "Where: " + Environment.NewLine
+                        + "- nam-comus is the desired model" + Environment.NewLine
+                        + "- -90,-84,47,41 is a rectangle box delimiting the desired region"
+                        + "- 0-12/3,15,18-80/6 represents the desired times, from +0 to +12 hours every 3 hours, then +15, then from +18 to +80 every 6 hours" + Environment.NewLine + Environment.NewLine
+                        + "To request a GRIB file from the SAILDOCS server, send a message with a the subject containing saildocs: and the body of the message containing model and box coordinates like this send coamps:36N,46N,100W,75W" + Environment.NewLine + Environment.NewLine
+                        + "To request a foreward, type in the subject 'forward:RECIPIENT:SUBJECT' and in the body the body of your message, the message will be delivered to the recipients. If more than one, use comma to separate the email adresses" + Environment.NewLine + Environment.NewLine
+                        + "To request a yellowbrick race information, put in the subject 'raceinfo:RACE-KEY' where RACE-KEY can be replaced with an existing key" + Environment.NewLine + Environment.NewLine
+                        + "To request a report for a yellowbrick race section, put in the subject 'sectioninfo:RACE-KEY:SECTION-ID:REFERENCE-TEAM' where race id is a yellowbrick race id, section is a section id, and reference team is the id of the team used as reference for the report." + Environment.NewLine + Environment.NewLine
+                        + "To send a tweet, enter in the subject tweet: followed by the tweet you want to post. For example tweet:Hello World! in the subject" + Environment.NewLine + "Attach an image to the email in order to post an image with the tweet";
                         SMTPTools.SendMail(m.From.Address, "Help Response", message);
                     }
                     catch { }
@@ -243,11 +236,13 @@ namespace MailListenter
                             List<string> errorAndWarnings = new List<string>();
                             string filename = GRIBTools.DoFilterGrib(m.Subject, out errorAndWarnings);
                             FileInfo fi = new FileInfo(filename);
-                            string bodyMessage = errorAndWarnings.Aggregate((i, j) => i + Environment.NewLine + j);
+                            string bodyMessage = "OK";
+                            if(errorAndWarnings.Count>0)
+                                bodyMessage = errorAndWarnings.Aggregate((i, j) => i + Environment.NewLine + j);
                             List<string> filesForward = new List<string>();
                             filesForward.Add(filename);
-                            
-                            SMTPTools.SendMail(m.From.Address, split[0].ToLower(), bodyMessage, true, filesForward.ToArray());
+
+                            SMTPTools.SendMail(m.From.Address, "GRIB Requested: " + m.Subject, bodyMessage, true, filesForward.ToArray());
 
                             foreach (string file in filesForward)
                                 File.Delete(file);
@@ -259,18 +254,36 @@ namespace MailListenter
                 {
                     try 
                     {
+                        string consumerKey = "amdg77KQolD6GdbhXpsIeGnRZ";
+                        string consumerSectet = "wWTpjJ1hSWTIivRMYgSu2qBpEVwtFk7oQleDNkivFZmV5gZwAA";
+                        string accessToken = "2654832530-Ryen50pE0Jy3yTXwU5Fm7P09Ur5C5AkWsAkT5ZK";
+                        string accessTokenSecret = "kdXzccCnDA8S71aKfxMukk8EfUpJpaKbjHs8XSS35xe1J";
+
                         string[] split = m.Subject.Split(new char[] { ':' }, 2);
-                        if (m.Sender.Address == "teamsorcerer@gmail.com")
-                            TwitterCredentials.SetCredentials("2654832530-Ryen50pE0Jy3yTXwU5Fm7P09Ur5C5AkWsAkT5ZK", "kdXzccCnDA8S71aKfxMukk8EfUpJpaKbjHs8XSS35xe1J", "amdg77KQolD6GdbhXpsIeGnRZ", "wWTpjJ1hSWTIivRMYgSu2qBpEVwtFk7oQleDNkivFZmV5gZwAA");
+                        ITwitterCredentials credentials;
+                        if (m.From.Address == "teamsorcerer@mailasail.com" 
+                            || m.From.Address == "chicago.beercanracing@gmail.com"
+                            || m.From.Address == "lahendo@gmail.com"
+                            || m.From.Address == "dondraper1@yahoo.com")
+                            credentials = Auth.SetUserCredentials(consumerKey, consumerSectet, accessToken, accessTokenSecret);
                         else
-                            return "We do not have tweeter parameter for that email";
-                        var newTweet = Tweetinvi.Tweet.CreateTweet(split[1]);
-                        foreach(AE.Net.Mail.Attachment att in m.Attachments){
-                            newTweet.AddMedia(att.GetData());
+                            return "We do not have tweeter parameters for that email";
+
+                        var user = User.GetAuthenticatedUser(credentials);
+
+                        if (m.Attachments != null && m.Attachments.Count != 0)
+                            foreach (AE.Net.Mail.Attachment att in m.Attachments)
+                            {
+                                var media = Upload.UploadImage(att.GetData());
+                                var tweet = Tweet.PublishTweet(split[1], new PublishTweetOptionalParameters { Medias = new List<IMedia> { media } });
+                            }
+                        else
+                        {
+                            var newTweet = Tweet.PublishTweet(split[1]);
                         }
-                        newTweet.Publish();
                     }
-                    catch { }
+                    catch (Exception e)
+                    { }
                 }
             }
             return "";

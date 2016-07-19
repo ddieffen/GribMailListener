@@ -26,7 +26,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>5</ApplicationRevision>
+    <ApplicationRevision>9</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -63,10 +63,16 @@
     <ManifestKeyFile>MailListener_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
     <SignManifests>true</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Autofac">
@@ -81,8 +87,9 @@
     <Reference Include="Microsoft.Threading.Tasks.Extensions.Desktop">
       <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.Extensions.Desktop.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -99,32 +106,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Tweetinvi">
-      <HintPath>..\packages\TweetinviAPI.0.9.8.2\lib\Tweetinvi.dll</HintPath>
-    </Reference>
-    <Reference Include="Tweetinvi.Controllers">
-      <HintPath>..\packages\TweetinviAPI.0.9.8.2\lib\Tweetinvi.Controllers.dll</HintPath>
-    </Reference>
-    <Reference Include="Tweetinvi.Core">
-      <HintPath>..\packages\TweetinviAPI.0.9.8.2\lib\Tweetinvi.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Tweetinvi.Credentials">
-      <HintPath>..\packages\TweetinviAPI.0.9.8.2\lib\Tweetinvi.Credentials.dll</HintPath>
-    </Reference>
-    <Reference Include="Tweetinvi.Factories">
-      <HintPath>..\packages\TweetinviAPI.0.9.8.2\lib\Tweetinvi.Factories.dll</HintPath>
-    </Reference>
-    <Reference Include="Tweetinvi.Logic">
-      <HintPath>..\packages\TweetinviAPI.0.9.8.2\lib\Tweetinvi.Logic.dll</HintPath>
-    </Reference>
-    <Reference Include="Tweetinvi.Security">
-      <HintPath>..\packages\TweetinviAPI.0.9.8.2\lib\Tweetinvi.Security.dll</HintPath>
-    </Reference>
-    <Reference Include="Tweetinvi.Streams">
-      <HintPath>..\packages\TweetinviAPI.0.9.8.2\lib\Tweetinvi.Streams.dll</HintPath>
-    </Reference>
-    <Reference Include="Tweetinvi.WebLogic">
-      <HintPath>..\packages\TweetinviAPI.0.9.8.2\lib\Tweetinvi.WebLogic.dll</HintPath>
+    <Reference Include="Tweetinvi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=7247f14397bf67b9, processorArchitecture=MSIL">
+      <HintPath>..\packages\TweetinviAPI.1.0\lib\net45\Tweetinvi.dll</HintPath>
+      <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -143,19 +127,19 @@
     <Compile Include="Tools\SecurityTools.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\YellowBrickV6\YellowbrickV6\YellowbrickV6\YellowbrickV6.csproj">
-      <Project>{651e9f05-1674-427d-852a-5c14edfea438}</Project>
-      <Name>YellowbrickV6</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\aenetmail-master\AE.Net.Mail.csproj">
       <Project>{68E9CF8C-AB54-4CC7-A34F-C7F469E4EFE0}</Project>
       <Name>AE.Net.Mail</Name>
     </ProjectReference>
+    <ProjectReference Include="..\YellowbrickV8\YellowbrickV8.csproj">
+      <Project>{360ff0eb-6694-49b2-b82b-e58329c57012}</Project>
+      <Name>YellowbrickV8</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="MailListener_TemporaryKey.pfx" />
     <None Include="packages.config" />
+    <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

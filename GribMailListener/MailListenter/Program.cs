@@ -1,15 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using AE.Net.Mail;
 using System.Threading;
-using System.Security;
-using System.Runtime.InteropServices;
-using MailListenter;
-using System.Net.Mail;
-using System.Net;
-using Tweetinvi;
+
 
 namespace MailListenter
 {
@@ -28,11 +21,11 @@ namespace MailListenter
                     SMTPTools.TrySMTP();
 
                     ic = new ImapClient(
-                               MailListenter.Properties.Settings.Default.imapserver,
-                               MailListenter.Properties.Settings.Default.imapuser,
-                               SecurityTools.ToInsecureString(SecurityTools.DecryptString(MailListenter.Properties.Settings.Default.imappassword)),
+                               Properties.Settings.Default.imapserver,
+                               Properties.Settings.Default.imapuser,
+                               SecurityTools.ToInsecureString(SecurityTools.DecryptString(Properties.Settings.Default.imappassword)),
                                AuthMethods.Login,
-                               MailListenter.Properties.Settings.Default.imapport,
+                               Properties.Settings.Default.imapport,
                                true);
 
                     ic.SelectMailbox("INBOX");// Select a mailbox. Case-insensitive
@@ -51,28 +44,26 @@ namespace MailListenter
                             // and it also includes the 10th message, which is really the eleventh ;)
                             // MailMessage represents, well, a message in your mailbox
 
-                            AE.Net.Mail.MailMessage[] mm = ic.GetMessages(MailListenter.Properties.Settings.Default.lastfetchuid, "*", false);
+                            MailMessage[] mm = ic.GetMessages(Properties.Settings.Default.lastfetchuid, "*", false);
 
-                            foreach (AE.Net.Mail.MailMessage m in mm)
+                            //Console.Write("\r" + "Found " + mm.Length + " new messages");
+
+                            foreach (MailMessage m in mm)
                             {
-
-                                if (!m.Uid.Equals(MailListenter.Properties.Settings.Default.lastfetchuid))
+                                if (Convert.ToInt32(m.Uid) > Convert.ToInt32(Properties.Settings.Default.lastfetchuid))
                                 {
-                                    if (m != null && m.From != null && m.From.Address != null && (m.From.Address == "teamsorcerer@gmail.com"
-                                        || m.From.Address == "mikepanacek@hotmail.com"))
+                                    Query q = new Query(m, awaiting);
+                                    if (q.isValid())
                                     {
-                                        Query q = new Query(m, awaiting);
-                                        if (q.isValid())
-                                        {
-                                            string result = q.execute();
-                                            Console.WriteLine("\r" + DateTime.Now.ToString() + " Executing Request:" + q.ToString());
-                                            if (result != "")
-                                                awaiting.Add(result);
-                                        }
+                                        string result = q.execute();
+                                        Console.WriteLine("\r" + DateTime.Now.ToString() + " Executing Request:" + q.ToString());
+                                        if (result != "")
+                                            awaiting.Add(result);
                                     }
+                                    Properties.Settings.Default.lastfetchuid = m.Uid;
+                                    Properties.Settings.Default.Save();
                                 }
-                                MailListenter.Properties.Settings.Default.lastfetchuid = m.Uid;
-                                MailListenter.Properties.Settings.Default.Save();
+                                
                             }
                            
                             lastUpdate = DateTime.Now;

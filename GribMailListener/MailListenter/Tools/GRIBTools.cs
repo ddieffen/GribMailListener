@@ -147,7 +147,25 @@ namespace MailListenter
             return list;    
         }
 
-        public static List<string> KnownModels = new List<string>() { "nam-conus", "nam-na", "gfs0.25", "gfs0.5", "gfs1.0", "gefs-hi-avg", "gefs-low-avg", "naefs-hi-avg", "naefs-low-avg", "gefs-hi-mode", "gefs-low-mode", "naefs-hi-mode", "naefs-low-mode" };
+        static int ToTime(string dateTime1, string dateTime2)
+        {
+            int y1, m1, d1, t1, y2, m2, d2, t2;
+            y1 = Convert.ToInt16(dateTime1.Substring(0, 4));
+            m1 = Convert.ToInt16(dateTime1.Substring(4, 2));
+            d1 = Convert.ToInt16(dateTime1.Substring(6, 2));
+            t1 = Convert.ToInt16(dateTime1.Substring(8, 2));
+            y2 = Convert.ToInt16(dateTime2.Substring(0, 4));
+            m2 = Convert.ToInt16(dateTime2.Substring(4, 2));
+            d2 = Convert.ToInt16(dateTime2.Substring(6, 2));
+            t2 = Convert.ToInt16(dateTime2.Substring(8, 2));
+
+            TimeSpan ts = new DateTime(y2, m2, d2, t2, 0, 0) - new DateTime(y1, m1, d1, t1, 0, 0);
+            return (int)ts.TotalHours;
+        }
+
+        public static List<string> KnownModels = new List<string>() { "nam-conus", "nam-na"
+            , "gfs0.25", "gfs0.5", "gfs1.0"
+            , "gefs-hi-avg", "gefs-low-avg", "naefs-hi-avg", "naefs-low-avg", "gefs-hi-mode", "gefs-low-mode", "naefs-hi-mode", "naefs-low-mode"};
 
         /// <summary>
         /// Parses a string for a NAM-CONUS weather request
@@ -285,26 +303,43 @@ namespace MailListenter
                     maxCycle = time.cycle;
 
             string simulationDate = DateTime.Now.ToString("yyyyMMdd-Hmm");
+            string[] split;
             switch (modelRequest)
             {
                 case "nam-conus":
                     simulationDate = latest.Href.Substring(latest.Href.Length-8,8);
                     break;
                 case "nam-na":
+                    simulationDate = latest.Href.Substring(latest.Href.Length - 8, 8);
                     break;
                 case "gfs0.25":
+                    simulationDate = latest.Href.Substring(latest.Href.Length - 10, 8);
                     break;
                 case "gfs0.5":
+                    simulationDate = latest.Href.Substring(latest.Href.Length - 10, 8);
                     break;
                 case "gfs1.0":
+                    simulationDate = latest.Href.Substring(latest.Href.Length - 10, 8);
                     break;
                 case "gefs-low-avg":
+                    split = latest.Href.Split('%');
+                    if (split.Length > 2)
+                        simulationDate = split[1].Substring(split[1].Length - 8, 8);
                     break;
                 case "gefs-low-mode":
+                    split = latest.Href.Split('%');
+                    if (split.Length > 2)
+                        simulationDate = split[1].Substring(split[1].Length - 8, 8);
                     break;
                 case "gefs-hi-avg":
+                    split = latest.Href.Split('%');
+                    if (split.Length > 2)
+                        simulationDate = split[1].Substring(split[1].Length - 8, 8);
                     break;
                 case "gefs-hi-mode":
+                    split = latest.Href.Split('%');
+                    if (split.Length > 2)
+                        simulationDate = split[1].Substring(split[1].Length - 8, 8);
                     break;
                 case "naefs-low-avg":
                     break;
@@ -363,8 +398,14 @@ namespace MailListenter
                 currentPosition += grbTime.buffer.Length;
             }
 
+            string times = "";
+            if (cycleFound.Count > 0)
+                times += cycleFound.Min().ToString();
+            if (cycleFound.Count > 1)
+                times += "-" + cycleFound.Max().ToString();
+
             //writing the file
-            string path = modelRequest + "-" + simulationDate + "T" + maxCycle + ".grb";
+            string path = modelRequest + "_" + simulationDate + "_T" + maxCycle + "Z_" + times + ".grb";
             File.WriteAllBytes(path, stacked);
             return path;
         }

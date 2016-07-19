@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Net.Mail;
 using System.Net;
@@ -26,7 +24,7 @@ namespace MailListenter
 
             using (MailMessage mail = new MailMessage())
             {
-                mail.From = new MailAddress(MailListenter.Properties.Settings.Default.smtpuser);
+                mail.From = new MailAddress(Properties.Settings.Default.smtpuser);
                 mail.To.Add(emailTo);
                 mail.Subject = subject;
                 mail.Body = body;
@@ -49,9 +47,9 @@ namespace MailListenter
                     }
                 }
 
-                using (SmtpClient smtp = new SmtpClient(MailListenter.Properties.Settings.Default.smtpserver, MailListenter.Properties.Settings.Default.smtpport))
+                using (SmtpClient smtp = new SmtpClient(Properties.Settings.Default.smtpserver, Properties.Settings.Default.smtpport))
                 {
-                    smtp.Credentials = new NetworkCredential(MailListenter.Properties.Settings.Default.smtpuser, SecurityTools.ToInsecureString(SecurityTools.DecryptString(MailListenter.Properties.Settings.Default.smtppassword)));
+                    smtp.Credentials = new NetworkCredential(Properties.Settings.Default.smtpuser, SecurityTools.ToInsecureString(SecurityTools.DecryptString(Properties.Settings.Default.smtppassword)));
                     smtp.EnableSsl = enableSSL;
                     smtp.Send(mail);
                 }
@@ -63,10 +61,10 @@ namespace MailListenter
             bool haveInfo = false;
             while (!haveInfo)
             {
-                if (!String.IsNullOrEmpty(MailListenter.Properties.Settings.Default.smtpserver)
-                       && !String.IsNullOrEmpty(MailListenter.Properties.Settings.Default.smtpport.ToString())
-                       && !String.IsNullOrEmpty(MailListenter.Properties.Settings.Default.smtpuser)
-                       && !String.IsNullOrEmpty(MailListenter.Properties.Settings.Default.smtppassword))
+                if (!String.IsNullOrEmpty(Properties.Settings.Default.smtpserver)
+                       && !String.IsNullOrEmpty(Properties.Settings.Default.smtpport.ToString())
+                       && !String.IsNullOrEmpty(Properties.Settings.Default.smtpuser)
+                       && !String.IsNullOrEmpty(Properties.Settings.Default.smtppassword))
                 {
                     haveInfo = true;
                 }
@@ -74,11 +72,11 @@ namespace MailListenter
                 {
                     Console.WriteLine("Invalid SMTP configuration, please re-enter information");
                     Console.WriteLine("Please enter SMTP server address (example: smtp.gmail.com):");
-                    MailListenter.Properties.Settings.Default.smtpserver = Console.ReadLine();
+                    Properties.Settings.Default.smtpserver = Console.ReadLine();
                     Console.WriteLine("Please enter SMTP server port (example: 587):");
-                    MailListenter.Properties.Settings.Default.smtpport = Convert.ToInt32(Console.ReadLine());
+                    Properties.Settings.Default.smtpport = Convert.ToInt32(Console.ReadLine());
                     Console.WriteLine("Please enter user name (example: name@gmail.com):");
-                    MailListenter.Properties.Settings.Default.smtpuser = Console.ReadLine();
+                    Properties.Settings.Default.smtpuser = Console.ReadLine();
                     Console.WriteLine("Please enter password:");
                     ConsoleKeyInfo key; String pass = "";
                     do
@@ -102,8 +100,8 @@ namespace MailListenter
                     }
                     // Stops Receving Keys Once Enter is Pressed
                     while (key.Key != ConsoleKey.Enter);
-                    MailListenter.Properties.Settings.Default.smtppassword = SecurityTools.EncryptString(SecurityTools.ToSecureString(pass));
-                    MailListenter.Properties.Settings.Default.Save();
+                    Properties.Settings.Default.smtppassword = SecurityTools.EncryptString(SecurityTools.ToSecureString(pass));
+                    Properties.Settings.Default.Save();
                 }
             }
         }
