@@ -21,7 +21,9 @@ namespace YellowbrickV8
             #region http request
             Random rnd = new Random();
             HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(serverName + "/BIN/" + raceKey + "/AllPositions?r=" + rnd.NextDouble());
-            webRequest.UserAgent = "Mozilla/4.0 (compatible; MSIE 6.0; Windows 5.1;";
+            webRequest.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36";
+            webRequest.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+            webRequest.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8";
             HttpWebResponse webResponse = (HttpWebResponse)webRequest.GetResponse();
             Stream responseStream = webResponse.GetResponseStream();
             MemoryStream m = new MemoryStream();
