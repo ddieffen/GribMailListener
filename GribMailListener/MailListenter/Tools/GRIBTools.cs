@@ -141,6 +141,14 @@ namespace MailListenter
                     tref.model = split[0];
                     tref.time = Convert.ToInt16(split[2].Replace("ndgd_conusf", ""));
                 }
+                else if (modelRequest == "hrw-conus")
+                {
+                    tref.full_name = file;
+                    tref.cycle = Convert.ToInt16(split[1].Trim('t').Trim('z'));
+                    tref.model = split[0];
+                    tref.time = Convert.ToInt16(split[2].Replace("awip32", ""));
+                }
+
                 list.Add(tref);
             }
 
@@ -270,6 +278,12 @@ namespace MailListenter
                     break;
                 case "naefs-hi-mode":
                     urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_naefsbc_ndgd.pl";
+                    urlModel = urlDir + "?file=";
+                    urlParameter = "&lev_surface=on&lev_10_m_above_ground=on&var_PRES=on&var_UGRD=on&var_VGRD=on&subregion=&leftlon="
+                        + leftLon + "&rightlon=" + rightLon + "&toplat=" + topLat + "&bottomlat=" + bottomLat + "&dir=";
+                    break;
+                case "hrw-conus":
+                    urlDir = "http://nomads.ncep.noaa.gov/cgi-bin/filter_hiresconus.pl";
                     urlModel = urlDir + "?file=";
                     urlParameter = "&lev_surface=on&lev_10_m_above_ground=on&var_PRES=on&var_UGRD=on&var_VGRD=on&subregion=&leftlon="
                         + leftLon + "&rightlon=" + rightLon + "&toplat=" + topLat + "&bottomlat=" + bottomLat + "&dir=";
