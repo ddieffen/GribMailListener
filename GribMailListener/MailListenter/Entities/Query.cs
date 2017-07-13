@@ -56,22 +56,22 @@ namespace MailListenter
                     type = QueryType.forward;
                     return true;
                 }
-                if (m != null && string.Equals(m.Subject, "help"))
+                if (m != null && string.Equals(m.Subject.ToLower(), "help"))
                 {
                     type = QueryType.help;
                     return true;
                 }
-                if(m != null && m.Subject.StartsWith("raceinfo:"))
+                if(m != null && m.Subject.ToLower().StartsWith("raceinfo:"))
                 {
                     type = QueryType.raceinfo;
                     return true;
                 }
-                if (m != null && m.Subject.StartsWith("sectioninfo:"))
+                if (m != null && m.Subject.ToLower().StartsWith("sectioninfo:"))
                 {
                     type = QueryType.sectioninfo;
                     return true;
                 }
-                if (m != null && m.Subject.StartsWith("tweet:"))
+                if (m != null && m.Subject.ToLower().StartsWith("tweet:"))
                 {
                     type = QueryType.tweet;
                     return true;
@@ -80,7 +80,7 @@ namespace MailListenter
                 {
                     bool test = false;
                     foreach (String modelName in GRIBTools.KnownModels)
-                        test = test || m.Subject.StartsWith(modelName);
+                        test = test || m.Subject.ToLower().StartsWith(modelName);
                     if (test)
                     {
                         type = QueryType.grib;
@@ -248,7 +248,9 @@ namespace MailListenter
                                 File.Delete(file);
                         }
                     }
-                    catch { }
+                    catch (Exception e)
+                    {
+                    }
                 }
                 else if (type == QueryType.tweet)
                 {
@@ -264,7 +266,10 @@ namespace MailListenter
                         if (m.From.Address == "teamsorcerer@mailasail.com" 
                             || m.From.Address == "chicago.beercanracing@gmail.com"
                             || m.From.Address == "lahendo@gmail.com"
-                            || m.From.Address == "dondraper1@yahoo.com")
+                            || m.From.Address == "dondraper1@yahoo.com"
+                            || m.From.Address == "sorcerer@gmn-usa.com"
+                            || m.From.Address == "sorcerer@myiridium.net"
+                            || m.From.Address == "ddieffen@gmail.com")
                             credentials = Auth.SetUserCredentials(consumerKey, consumerSectet, accessToken, accessTokenSecret);
                         else
                             return "We do not have tweeter parameters for that email";
@@ -283,7 +288,9 @@ namespace MailListenter
                         }
                     }
                     catch (Exception e)
-                    { }
+                    {
+
+                    }
                 }
             }
             return "";

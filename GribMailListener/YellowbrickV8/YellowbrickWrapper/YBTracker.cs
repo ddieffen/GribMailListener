@@ -431,13 +431,19 @@ namespace YellowbrickV8
                 refTeam = race.teams.Single(t => t.id == referenceTeam);
             else
             {
-                int winningTeam = latestMoments.OrderBy(t => t.Value.dtfMeters).First().Key;
-                refTeam = race.teams.Single(t => t.id == winningTeam);
+                if (latestMoments.Count > 0)
+                {
+                    int winningTeam = latestMoments.OrderBy(t => t.Value.dtfMeters).First().Key;
+                    refTeam = race.teams.Single(t => t.id == winningTeam);
+                }
+                else
+                    refTeam = null;
             }
-
-            Moment reference = latestMoments[refTeam.id];
+            Moment reference = null;
+            if (refTeam != null)
+                reference = latestMoments[refTeam.id];
             
-            report += "Reference Team: " + refTeam.name + "</br></br>";
+            report += "Reference Team: " + (refTeam!=null?refTeam.name:"Unknown Team") + "</br></br>";
             report += "<table cellpadding=5 border=1 cellspacing=0>";
             report += "<tr><td>Pos</td><td>NAME</td><td>SPEED</td><td>ToFinish</td><td>RelToF</td><td>Rel Ang</td><td>Rel Dst</td><td>Lat</td><td>Lon</td><td>At</td></tr>\r\n";
             int position = 1;
@@ -455,12 +461,12 @@ namespace YellowbrickV8
                         report += "<tr align=right>";
 
                     report += "<td>" + position + "</td>"
-                        + "<td>" + (team.id == refTeam.id ? ">>" : "") + team.name.Lenght(18) + "</td>"
+                        + "<td>" + (team.id == (refTeam != null ? refTeam.id:-1) ? ">>" : "") + team.name.Lenght(18) + "</td>"
                         + "<td>" + moment.spdKn.ToString("0.0") + "kn</td>"
                         + "<td>" + UnitTools.M2Nm(moment.dtfMeters).ToString("0.0") + "mn</td>"
-                        + "<td>" + UnitTools.M2Nm(moment.dtfMeters - reference.dtfMeters).ToString("0.0") + "mn</td>"
-                        + "<td>" + CoordinateTools.HaversineHeadingDegrees(reference.lat, reference.lon, moment.lat, moment.lon).ToString("0.0") + "</td>"
-                        + "<td>" + CoordinateTools.HaversineDistanceNauticalMiles(reference.lat, reference.lon, moment.lat, moment.lon).ToString("0.0") + "nm</td>"
+                        + "<td>" + UnitTools.M2Nm(moment.dtfMeters - (reference!=null?reference.dtfMeters:0)).ToString("0.0") + "mn</td>"
+                        + "<td>" + CoordinateTools.HaversineHeadingDegrees(reference.lat, (reference != null ? reference.lon:0), moment.lat, moment.lon).ToString("0.0") + "</td>"
+                        + "<td>" + CoordinateTools.HaversineDistanceNauticalMiles(reference.lat, (reference != null ? reference.lon:0), moment.lat, moment.lon).ToString("0.0") + "nm</td>"
                         + "<td>" + moment.lat.ToString("0.000000") + "</td>"
                         + "<td>" + moment.lon.ToString("0.000000") + "</td>"
                         + "<td>" + TimeTools.UnixTimeStampToDateTime(moment.at).ToString("u") + "</td>"

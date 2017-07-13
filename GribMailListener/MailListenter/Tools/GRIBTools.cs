@@ -143,10 +143,12 @@ namespace MailListenter
                 }
                 else if (modelRequest == "hrw-conus")
                 {
+                    if (split[2].Contains("arw"))
+                        continue;
                     tref.full_name = file;
                     tref.cycle = Convert.ToInt16(split[1].Trim('t').Trim('z'));
                     tref.model = split[0];
-                    tref.time = Convert.ToInt16(split[2].Replace("awip32", ""));
+                    tref.time = Convert.ToInt16(split[3].Replace("f", ""));
                 }
 
                 list.Add(tref);
@@ -173,7 +175,7 @@ namespace MailListenter
 
         public static List<string> KnownModels = new List<string>() { "nam-conus", "nam-na"
             , "gfs0.25", "gfs0.5", "gfs1.0"
-            , "gefs-hi-avg", "gefs-low-avg", "naefs-hi-avg", "naefs-low-avg", "gefs-hi-mode", "gefs-low-mode", "naefs-hi-mode", "naefs-low-mode"};
+            , "gefs-hi-avg", "gefs-low-avg", "naefs-hi-avg", "naefs-low-avg", "gefs-hi-mode", "gefs-low-mode", "naefs-hi-mode", "naefs-low-mode", "hrw-conus"};
 
         /// <summary>
         /// Parses a string for a NAM-CONUS weather request
@@ -334,6 +336,9 @@ namespace MailListenter
                     break;
                 case "gfs1.0":
                     simulationDate = latest.Href.Substring(latest.Href.Length - 10, 8);
+                    break;
+                case "hrw-conus":
+                    simulationDate = latest.Href.Substring(latest.Href.Length - 8, 8);
                     break;
                 case "gefs-low-avg":
                     split = latest.Href.Split('%');

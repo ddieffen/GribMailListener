@@ -34,6 +34,10 @@ namespace MailListenter
                     List<string> awaiting = new List<string>();
                     DateTime lastUpdate = new DateTime(1970, 1, 1);
 
+                    int uid = 0;
+                    if (!int.TryParse(Properties.Settings.Default.lastfetchuid, out uid))
+                        Properties.Settings.Default.lastfetchuid = "91384";
+
                     while (true)
                     {
                         double timeLapsed = (DateTime.Now - lastUpdate).TotalSeconds;
